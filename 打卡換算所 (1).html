@@ -1,0 +1,612 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>打卡換算所｜你買的不是東西，是人生工時</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Oswald:wght@400;500;600;700&family=Noto+Sans+TC:wght@400;500;700;900&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --ink:#1a1917;
+    --panel:#242220;
+    --panel-2:#2c2925;
+    --line:#3a3630;
+    --paper:#f4ecdc;
+    --paper-shadow:#e3d8bf;
+    --brass:#d9a441;
+    --brass-dim:#a67f38;
+    --stamp:#c1443c;
+    --mint:#6fa287;
+    --text:#ede6d6;
+    --text-muted:#a39a8a;
+    --text-on-paper:#2a2620;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    background:
+      radial-gradient(ellipse at top, #2a2723 0%, var(--ink) 55%);
+    color:var(--text);
+    font-family:'Noto Sans TC', sans-serif;
+    min-height:100vh;
+    padding:0 0 80px;
+    -webkit-font-smoothing:antialiased;
+  }
+  .mono{font-family:'IBM Plex Mono', monospace;}
+  .display{font-family:'Oswald', sans-serif;}
+
+  /* ---------- HERO ---------- */
+  .hero{
+    position:relative;
+    padding:56px 24px 40px;
+    text-align:center;
+    overflow:hidden;
+    border-bottom:1px solid var(--line);
+  }
+  .hero::before{
+    content:"";
+    position:absolute; inset:0;
+    background-image:
+      repeating-linear-gradient(90deg, transparent, transparent 39px, rgba(217,164,65,0.05) 39px, rgba(217,164,65,0.05) 40px);
+    pointer-events:none;
+  }
+  .clock-wrap{
+    width:64px;height:64px;margin:0 auto 18px;
+    border-radius:50%;
+    border:3px solid var(--brass);
+    position:relative;
+    background:var(--panel-2);
+    box-shadow:0 0 0 4px var(--ink), 0 0 24px rgba(217,164,65,0.25);
+  }
+  .clock-wrap .tick{position:absolute; inset:6px; }
+  .hand{
+    position:absolute; left:50%; bottom:50%;
+    width:2px; background:var(--brass); transform-origin:bottom center;
+    border-radius:2px;
+  }
+  .hand.hour{height:16px; background:var(--text); animation:tickhour 8s steps(12) infinite;}
+  .hand.min{height:22px; animation:tickmin 3s steps(12) infinite;}
+  @keyframes tickhour{ to{ transform:translateX(-50%) rotate(360deg); } }
+  @keyframes tickmin{ to{ transform:translateX(-50%) rotate(360deg); } }
+
+  .eyebrow{
+    font-family:'IBM Plex Mono', monospace;
+    letter-spacing:0.25em; text-transform:uppercase;
+    font-size:11px; color:var(--brass); margin-bottom:10px;
+  }
+  h1.title{
+    font-family:'Oswald', sans-serif;
+    font-weight:700; font-size:clamp(28px, 6vw, 46px);
+    margin:0 0 12px; letter-spacing:0.01em;
+    color:var(--text);
+  }
+  h1.title span{color:var(--brass);}
+  .subtitle{
+    font-size:15px; color:var(--text-muted); max-width:480px; margin:0 auto;
+    line-height:1.7;
+  }
+
+  /* ---------- LAYOUT ---------- */
+  .wrap{max-width:720px; margin:0 auto; padding:32px 20px 0;}
+  .section-label{
+    font-family:'IBM Plex Mono', monospace; font-size:11px; letter-spacing:0.18em;
+    text-transform:uppercase; color:var(--brass-dim); margin:0 0 12px;
+    display:flex; align-items:center; gap:10px;
+  }
+  .section-label::after{ content:""; flex:1; height:1px; background:var(--line); }
+
+  .card{
+    background:var(--panel);
+    border:1px solid var(--line);
+    border-radius:10px;
+    padding:22px;
+    margin-bottom:22px;
+  }
+
+  /* ---------- MODE DIAL ---------- */
+  .dial{
+    display:flex; background:var(--panel-2); border-radius:999px;
+    border:1px solid var(--line); padding:4px; margin-bottom:22px;
+  }
+  .dial button{
+    flex:1; border:none; background:transparent; color:var(--text-muted);
+    font-family:'Noto Sans TC'; font-weight:700; font-size:14px;
+    padding:12px 10px; border-radius:999px; cursor:pointer;
+    transition:all .25s ease;
+  }
+  .dial button.active{
+    background:var(--brass); color:#241d0d;
+    box-shadow:0 2px 10px rgba(217,164,65,0.35);
+  }
+
+  /* ---------- FIELDS ---------- */
+  .field{ margin-bottom:16px; }
+  .field label{
+    display:block; font-size:13px; color:var(--text-muted); margin-bottom:6px;
+    font-weight:500;
+  }
+  .field label b{color:var(--text); font-weight:700;}
+  .row2{ display:grid; grid-template-columns:1fr 1fr; gap:14px; }
+  input[type=number], select{
+    width:100%; background:var(--ink); border:1px solid var(--line);
+    color:var(--text); padding:12px 14px; border-radius:7px;
+    font-family:'IBM Plex Mono', monospace; font-size:15px;
+    -moz-appearance:textfield;
+  }
+  input[type=number]:focus, select:focus{
+    outline:none; border-color:var(--brass);
+    box-shadow:0 0 0 3px rgba(217,164,65,0.18);
+  }
+  .toggle-pair{ display:flex; gap:8px; }
+  .toggle-pair button{
+    flex:1; background:var(--ink); border:1px solid var(--line); color:var(--text-muted);
+    padding:10px; border-radius:7px; font-size:13px; cursor:pointer; font-family:'Noto Sans TC';
+    font-weight:500; transition:.2s;
+  }
+  .toggle-pair button.active{ background:rgba(217,164,65,0.15); border-color:var(--brass); color:var(--brass); font-weight:700;}
+  .hint{ font-size:12px; color:var(--text-muted); margin-top:6px; line-height:1.6;}
+
+  /* ---------- SHIFT PRESETS ---------- */
+  .preset-grid{
+    display:grid; grid-template-columns:repeat(2,1fr); gap:10px; margin-bottom:18px;
+  }
+  @media(min-width:520px){ .preset-grid{grid-template-columns:repeat(3,1fr);} }
+  .preset-card{
+    background:var(--ink); border:1px solid var(--line); border-radius:8px;
+    padding:12px 10px; text-align:center; cursor:pointer; transition:.2s;
+  }
+  .preset-card:hover{ border-color:var(--brass-dim); }
+  .preset-card.active{ border-color:var(--brass); background:rgba(217,164,65,0.1); }
+  .preset-card .p-name{ font-weight:700; font-size:13px; margin-bottom:3px; }
+  .preset-card .p-detail{ font-size:11px; color:var(--text-muted); font-family:'IBM Plex Mono'; }
+
+  /* ---------- BUTTON ---------- */
+  .stamp-btn{
+    width:100%; padding:18px; border:none; border-radius:10px;
+    background:linear-gradient(180deg, var(--stamp), #a3372f);
+    color:#fff2ea; font-family:'Oswald', sans-serif; font-weight:600;
+    font-size:18px; letter-spacing:0.08em; cursor:pointer;
+    box-shadow:0 4px 0 #7a2721, 0 8px 20px rgba(193,68,60,0.3);
+    transition:transform .08s ease, box-shadow .08s ease;
+  }
+  .stamp-btn:active{ transform:translateY(4px); box-shadow:0 0 0 #7a2721; }
+
+  /* ---------- RECEIPT ---------- */
+  .receipt-outer{ display:none; margin-top:26px; }
+  .receipt-outer.show{ display:block; animation:drop .4s ease; }
+  @keyframes drop{ from{opacity:0; transform:translateY(-14px);} to{opacity:1; transform:translateY(0);} }
+  .receipt{
+    background:var(--paper); color:var(--text-on-paper);
+    border-radius:4px; padding:26px 22px 20px;
+    box-shadow:0 10px 30px rgba(0,0,0,0.4);
+    position:relative;
+  }
+  .receipt::after{
+    content:""; position:absolute; left:0; right:0; bottom:-9px; height:18px;
+    background:
+      linear-gradient(135deg, var(--paper) 25%, transparent 25%) 0 0,
+      linear-gradient(225deg, var(--paper) 25%, transparent 25%) 0 0;
+    background-size:16px 18px; background-repeat:repeat-x;
+  }
+  .r-head{ text-align:center; border-bottom:1px dashed #b8ab8c; padding-bottom:14px; margin-bottom:14px; }
+  .r-head .r-title{ font-family:'Oswald'; font-weight:700; font-size:20px; letter-spacing:0.05em;}
+  .r-head .r-sub{ font-family:'IBM Plex Mono'; font-size:11px; color:#7a7160; margin-top:4px;}
+  .r-line{ display:flex; justify-content:space-between; align-items:baseline; padding:7px 0; font-family:'IBM Plex Mono'; font-size:13px;}
+  .r-line .k{ color:#6b6252; }
+  .r-line .v{ font-weight:600; }
+  .r-line .v.big{ font-size:20px; color:var(--stamp); font-weight:700;}
+  .r-divider{ border:none; border-top:1px dashed #b8ab8c; margin:14px 0; }
+  .r-hero-number{ text-align:center; padding:12px 0 18px; }
+  .r-hero-number .n{ font-family:'Oswald'; font-size:44px; font-weight:700; color:var(--stamp); line-height:1;}
+  .r-hero-number .lbl{ font-family:'IBM Plex Mono'; font-size:12px; color:#7a7160; margin-top:6px; }
+  .verdict{
+    margin-top:16px; padding:14px; border-radius:6px; text-align:center;
+    font-weight:700; font-size:14px; line-height:1.6;
+  }
+  .verdict.v-lo{ background:rgba(111,162,135,0.18); color:#3c6b52; }
+  .verdict.v-mid{ background:rgba(217,164,65,0.2); color:#8a5f16; }
+  .verdict.v-hi{ background:rgba(193,68,60,0.15); color:var(--stamp); }
+  .warn-box{
+    margin-top:12px; padding:10px 12px; border-radius:6px; font-size:12px;
+    background:rgba(193,68,60,0.12); color:#8a3128; line-height:1.6; font-weight:500;
+  }
+  .r-stamp{
+    position:absolute; top:20px; right:20px; width:56px; height:56px;
+    border:2.5px solid var(--stamp); border-radius:50%; color:var(--stamp);
+    display:flex; align-items:center; justify-content:center; text-align:center;
+    font-family:'Oswald'; font-weight:700; font-size:10px; letter-spacing:0.03em;
+    transform:rotate(-14deg); opacity:0.85;
+  }
+
+  /* ---------- HISTORY ---------- */
+  .history-item{
+    display:flex; justify-content:space-between; align-items:center;
+    background:var(--panel-2); border:1px solid var(--line); border-radius:7px;
+    padding:11px 14px; margin-bottom:8px; font-size:13px;
+  }
+  .history-item .hi-left{ font-family:'IBM Plex Mono'; color:var(--text-muted); }
+  .history-item .hi-left b{ color:var(--text); }
+  .history-item .hi-del{ background:none; border:none; color:var(--text-muted); cursor:pointer; font-size:16px; padding:4px 8px;}
+  .history-item .hi-del:hover{ color:var(--stamp); }
+  .empty-hist{ color:var(--text-muted); font-size:13px; text-align:center; padding:12px 0; }
+
+  footer{ text-align:center; color:var(--text-muted); font-size:12px; margin-top:40px; padding:0 20px; line-height:1.8;}
+</style>
+</head>
+<body>
+
+<div class="hero">
+  <div class="clock-wrap"><div class="tick"><div class="hand hour"></div><div class="hand min"></div></div></div>
+  <div class="eyebrow">PUNCH-CLOCK EXCHANGE</div>
+  <h1 class="title">打卡換算所<span>。</span></h1>
+  <p class="subtitle">你買的不是東西，是<b style="color:var(--text)">人生工時</b>。輸入班表與薪水，換算出這筆消費要你上多少班。</p>
+</div>
+
+<div class="wrap">
+
+  <div class="section-label">01 · 選擇班表制度</div>
+  <div class="dial">
+    <button id="dial-regular" class="active" onclick="setMode('regular')">週休二日 / 固定班</button>
+    <button id="dial-shift" onclick="setMode('shift')">輪班制</button>
+  </div>
+
+  <div class="card">
+    <!-- REGULAR MODE -->
+    <div id="mode-regular">
+      <div class="row2">
+        <div class="field">
+          <label>每週工作天數</label>
+          <input type="number" id="r-days" value="5" min="1" max="7" step="1">
+        </div>
+        <div class="field">
+          <label>每天工時（小時）</label>
+          <input type="number" id="r-hours" value="8" min="1" max="16" step="0.5">
+        </div>
+      </div>
+      <div class="field">
+        <label>每天通勤時間（來回，分鐘）</label>
+        <input type="number" id="r-commute" value="60" min="0" max="300" step="5">
+      </div>
+    </div>
+
+    <!-- SHIFT MODE -->
+    <div id="mode-shift" style="display:none;">
+      <div class="field">
+        <label>快速套用班表</label>
+        <div class="preset-grid" id="preset-grid"></div>
+      </div>
+      <div class="row2">
+        <div class="field">
+          <label>輪班週期天數</label>
+          <input type="number" id="s-cycle" value="4" min="1" max="30" step="1">
+        </div>
+        <div class="field">
+          <label>週期內上班天數</label>
+          <input type="number" id="s-workdays" value="2" min="1" max="30" step="1">
+        </div>
+      </div>
+      <div class="row2">
+        <div class="field">
+          <label>每班工時（小時）</label>
+          <input type="number" id="s-shifthours" value="12" min="1" max="24" step="0.5">
+        </div>
+        <div class="field">
+          <label>每班交接／準備（分鐘）</label>
+          <input type="number" id="s-prep" value="15" min="0" max="120" step="5">
+        </div>
+      </div>
+      <div class="field">
+        <label>每次通勤時間（來回，分鐘）</label>
+        <input type="number" id="s-commute" value="60" min="0" max="300" step="5">
+      </div>
+    </div>
+  </div>
+
+  <div class="section-label">02 · 薪資</div>
+  <div class="card">
+    <div class="field">
+      <label>月薪金額</label>
+      <input type="number" id="salary" value="50000" min="0" step="500">
+      <div class="toggle-pair" style="margin-top:10px;">
+        <button id="tax-net" class="active" onclick="setTax('net')">實領（稅後）</button>
+        <button id="tax-gross" onclick="setTax('gross')">稅前名目</button>
+      </div>
+      <div class="hint">建議填實領金額，換算出的「真實時薪」才貼近生活感受。</div>
+    </div>
+
+    <div class="field" style="margin-bottom:0;">
+      <label>時薪計算基準</label>
+      <div class="toggle-pair">
+        <button id="calc-schedule" class="active" onclick="setCalcMode('schedule')">精算班表</button>
+        <button id="calc-calendar" onclick="setCalcMode('calendar30')">月曆天數（月薪÷30÷8）</button>
+      </div>
+      <div class="hint" id="calc-mode-hint">精算班表：用你實際的上班天數／輪班週期算出月工時，比較貼近真實勞動量。</div>
+    </div>
+  </div>
+
+  <div class="section-label">03 · 淨資產與消費</div>
+  <div class="card">
+    <div class="field">
+      <label>目前淨資產（存款＋投資－負債，可為負數）</label>
+      <input type="number" id="networth" value="500000" step="10000">
+    </div>
+    <div class="field">
+      <label>想買的東西（金額）</label>
+      <input type="number" id="spend" value="3000" min="0" step="100">
+    </div>
+  </div>
+
+  <button class="stamp-btn" onclick="calculate()">▣ 打卡計算</button>
+
+  <div class="receipt-outer" id="receipt-outer">
+    <div class="receipt">
+      <div class="r-stamp" id="r-stamp">已<br>打卡</div>
+      <div class="r-head">
+        <div class="r-title">社畜工時對帳單</div>
+        <div class="r-sub" id="r-date"></div>
+      </div>
+
+      <div class="r-line"><span class="k" id="out-nominal-label">名目時薪</span><span class="v" id="out-nominal">—</span></div>
+      <div class="r-line"><span class="k" id="out-compare-label">對照（另一種算法）</span><span class="v" id="out-compare">—</span></div>
+      <div class="r-line"><span class="k">真實時薪（含通勤／準備）</span><span class="v" id="out-real">—</span></div>
+      <div class="r-line"><span class="k">時薪蒸發幅度</span><span class="v" id="out-gap">—</span></div>
+
+      <hr class="r-divider">
+
+      <div class="r-hero-number">
+        <div class="n" id="out-hours">—</div>
+        <div class="lbl" id="out-hours-label">這筆消費需要的勞動時間</div>
+      </div>
+
+      <div class="r-line"><span class="k">換算工作天／班數</span><span class="v" id="out-days">—</span></div>
+
+      <hr class="r-divider">
+
+      <div class="r-line"><span class="k">你的萬分之一門檻（0.01%）</span><span class="v" id="out-threshold">—</span></div>
+      <div class="r-line"><span class="k">這筆消費是門檻的</span><span class="v big" id="out-multiple">—</span></div>
+
+      <div class="verdict" id="verdict"></div>
+      <div class="warn-box" id="warn-box" style="display:none;"></div>
+    </div>
+  </div>
+
+  <div class="section-label" style="margin-top:34px;">04 · 對帳紀錄</div>
+  <div id="history-list"></div>
+
+</div>
+
+<footer>打卡換算所 · 純前端計算，資料只存在你自己的瀏覽器裡（localStorage）<br>2026 年台灣基本工資：月薪 29,500 元／時薪 196 元，僅供對照參考</footer>
+
+<script>
+let mode = 'regular';
+let taxType = 'net';
+let calcMode = 'schedule';
+let activePreset = null;
+
+function setCalcMode(m){
+  calcMode = m;
+  document.getElementById('calc-schedule').classList.toggle('active', m==='schedule');
+  document.getElementById('calc-calendar').classList.toggle('active', m==='calendar30');
+  const hint = document.getElementById('calc-mode-hint');
+  hint.textContent = m==='schedule'
+    ? '精算班表：用你實際的上班天數／輪班週期算出月工時，比較貼近真實勞動量。'
+    : '月曆天數：月薪 ÷ 30 天 ÷ 8 小時，簡單快速，但沒考慮你實際只上班幾天，時薪通常會偏低。';
+}
+
+const presets = [
+  {id:'d2o2', name:'做二休二', detail:'週期4天／上2天', cycle:4, workdays:2, shifthours:12},
+  {id:'four2', name:'四班二輪', detail:'週期8天／上4天', cycle:8, workdays:4, shifthours:12},
+  {id:'threeS', name:'三班制', detail:'週期7天／上5天', cycle:7, workdays:5, shifthours:8},
+  {id:'week2', name:'週休二日輪班', detail:'週期7天／上5天', cycle:7, workdays:5, shifthours:8.5},
+  {id:'d4o2', name:'做四休二', detail:'週期6天／上4天', cycle:6, workdays:4, shifthours:11},
+  {id:'custom', name:'自訂', detail:'手動輸入下方欄位', cycle:null, workdays:null, shifthours:null},
+];
+
+function renderPresets(){
+  const grid = document.getElementById('preset-grid');
+  grid.innerHTML = '';
+  presets.forEach(p=>{
+    const div = document.createElement('div');
+    div.className = 'preset-card' + (activePreset===p.id ? ' active' : '');
+    div.innerHTML = `<div class="p-name">${p.name}</div><div class="p-detail">${p.detail}</div>`;
+    div.onclick = () => applyPreset(p);
+    grid.appendChild(div);
+  });
+}
+
+function applyPreset(p){
+  activePreset = p.id;
+  if(p.cycle !== null){
+    document.getElementById('s-cycle').value = p.cycle;
+    document.getElementById('s-workdays').value = p.workdays;
+    document.getElementById('s-shifthours').value = p.shifthours;
+  }
+  renderPresets();
+}
+
+function setMode(m){
+  mode = m;
+  document.getElementById('dial-regular').classList.toggle('active', m==='regular');
+  document.getElementById('dial-shift').classList.toggle('active', m==='shift');
+  document.getElementById('mode-regular').style.display = m==='regular' ? 'block' : 'none';
+  document.getElementById('mode-shift').style.display = m==='shift' ? 'block' : 'none';
+}
+
+function setTax(t){
+  taxType = t;
+  document.getElementById('tax-net').classList.toggle('active', t==='net');
+  document.getElementById('tax-gross').classList.toggle('active', t==='gross');
+}
+
+function fmt(n, decimals=0){
+  return Number(n).toLocaleString('zh-Hant-TW', {maximumFractionDigits:decimals, minimumFractionDigits:decimals});
+}
+
+function calculate(){
+  const salary = parseFloat(document.getElementById('salary').value) || 0;
+  const networth = parseFloat(document.getElementById('networth').value) || 0;
+  const spend = parseFloat(document.getElementById('spend').value) || 0;
+
+  if(salary <= 0){ alert('請輸入月薪金額'); return; }
+  if(spend < 0){ alert('消費金額不能是負數'); return; }
+
+  let nominalHours, realHours;
+
+  if(mode === 'regular'){
+    const days = Math.max(parseFloat(document.getElementById('r-days').value) || 0, 0.1);
+    const hrs = Math.max(parseFloat(document.getElementById('r-hours').value) || 0, 0.1);
+    const commuteMin = Math.max(parseFloat(document.getElementById('r-commute').value) || 0, 0);
+
+    const monthlyWorkHours = days * hrs * 52 / 12;
+    const monthlyCommuteHours = days * (commuteMin/60) * 52 / 12;
+
+    nominalHours = monthlyWorkHours;
+    realHours = monthlyWorkHours + monthlyCommuteHours;
+  } else {
+    const cycle = Math.max(parseFloat(document.getElementById('s-cycle').value) || 0, 0.1);
+    const workdays = Math.max(parseFloat(document.getElementById('s-workdays').value) || 0, 0);
+    const shiftHrs = Math.max(parseFloat(document.getElementById('s-shifthours').value) || 0, 0.1);
+    const prepMin = Math.max(parseFloat(document.getElementById('s-prep').value) || 0, 0);
+    const commuteMin = Math.max(parseFloat(document.getElementById('s-commute').value) || 0, 0);
+
+    if(workdays > cycle){ alert('週期內上班天數不能超過週期天數'); return; }
+
+    const cyclesPerMonth = 30.44 / cycle;
+    const monthlyWorkdays = cyclesPerMonth * workdays;
+    const monthlyWorkHours = monthlyWorkdays * shiftHrs;
+    const monthlyExtraHours = monthlyWorkdays * ((prepMin + commuteMin)/60);
+
+    nominalHours = monthlyWorkHours;
+    realHours = monthlyWorkHours + monthlyExtraHours;
+  }
+
+  // Normalize to net (after-tax) hourly if user entered gross — apply rough estimate.
+  let effectiveSalary = salary;
+  let taxNote = '';
+  if(taxType === 'gross'){
+    effectiveSalary = salary * 0.94; // rough estimate: ~6% 勞健保/勞退等常見扣除
+    taxNote = '（已依常見勞健保／勞退比例概估為實領約 94%，僅供參考，實際請以薪資單為準）';
+  }
+
+  const scheduleNominalWage = salary / nominalHours;
+  const calendarNominalWage = salary / (30 * 8);
+  const nominalWage = calcMode === 'calendar30' ? calendarNominalWage : scheduleNominalWage;
+  const realWage = effectiveSalary / realHours;
+  const gapPct = ((nominalWage - realWage) / nominalWage) * 100;
+
+  const spendHours = spend / realWage;
+  const spendDays_regular = spendHours / (mode==='regular'
+    ? (parseFloat(document.getElementById('r-hours').value) || 8)
+    : (parseFloat(document.getElementById('s-shifthours').value) || 8));
+
+  const threshold = networth * 0.0001;
+  const multiple = threshold !== 0 ? spend / threshold : null;
+
+  // ---- render receipt ----
+  document.getElementById('out-nominal-label').textContent = calcMode === 'calendar30' ? '名目時薪（月曆天數法）' : '名目時薪（精算班表）';
+  document.getElementById('out-nominal').textContent = `NT$ ${fmt(nominalWage)} / 小時`;
+
+  document.getElementById('out-compare-label').textContent = calcMode === 'calendar30' ? '對照：精算班表法' : '對照：月曆天數法（÷30÷8）';
+  document.getElementById('out-compare').textContent = `NT$ ${fmt(calcMode === 'calendar30' ? scheduleNominalWage : calendarNominalWage)} / 小時`;
+
+  document.getElementById('out-real').textContent = `NT$ ${fmt(realWage)} / 小時`;
+  document.getElementById('out-gap').textContent = `${gapPct >= 0 ? '－' : '＋'}${fmt(Math.abs(gapPct),1)}%`;
+
+  document.getElementById('out-hours').textContent = `${fmt(spendHours,1)} 小時`;
+  document.getElementById('out-hours-label').textContent = mode==='shift' ? '這筆消費需要的勞動時間' : '這筆消費需要的勞動時間';
+
+  const unitLabel = mode==='shift' ? '班' : '個標準工作天';
+  document.getElementById('out-days').textContent = `約 ${fmt(spendDays_regular,1)} ${unitLabel}`;
+
+  document.getElementById('out-threshold').textContent = `NT$ ${fmt(threshold)}`;
+
+  let multipleText, verdictClass, verdictText;
+  if(networth <= 0){
+    multipleText = '不適用';
+    verdictClass = 'v-hi';
+    verdictText = '目前淨資產為零或負數，萬分之一法則暫不適用 —— 這類消費建議先以現金流與必要性來判斷，而不是資產比例。';
+  } else {
+    multipleText = `${fmt(multiple,1)} 倍`;
+    if(multiple <= 1){
+      verdictClass = 'v-lo';
+      verdictText = '零錢等級。這筆消費對你的資產幾乎無感，安心花。';
+    } else if(multiple <= 5){
+      verdictClass = 'v-mid';
+      verdictText = '小奢侈。超出你的無感門檻，但仍在合理範圍，值得的話就買。';
+    } else {
+      verdictClass = 'v-hi';
+      verdictText = '認真想一下。這筆金額遠超你的萬分之一門檻，建議多留一天再決定。';
+    }
+  }
+  document.getElementById('out-multiple').textContent = multipleText;
+
+  const verdictEl = document.getElementById('verdict');
+  verdictEl.className = 'verdict ' + verdictClass;
+  verdictEl.textContent = verdictText;
+
+  const warnBox = document.getElementById('warn-box');
+  const minWage2026 = 196;
+  if(realWage < minWage2026){
+    warnBox.style.display = 'block';
+    warnBox.textContent = `⚠ 你算出的真實時薪（NT$${fmt(realWage)}）低於 2026 年台灣法定最低時薪 NT$196，可能代表你的通勤／加班／準備時間被嚴重低估，實質工時比薪資單上看到的還重。${taxNote}`;
+  } else if(taxNote){
+    warnBox.style.display = 'block';
+    warnBox.textContent = taxNote;
+  } else {
+    warnBox.style.display = 'none';
+  }
+
+  document.getElementById('r-date').textContent = new Date().toLocaleString('zh-Hant-TW', {year:'numeric', month:'2-digit', day:'2-digit', hour:'2-digit', minute:'2-digit'});
+
+  document.getElementById('receipt-outer').classList.add('show');
+  document.getElementById('receipt-outer').scrollIntoView({behavior:'smooth', block:'nearest'});
+
+  saveHistory({
+    time: Date.now(),
+    spend, realWage, spendHours, multiple: networth>0 ? multiple : null, verdictClass
+  });
+}
+
+// ---------- HISTORY (localStorage) ----------
+function loadHistory(){
+  try{
+    return JSON.parse(localStorage.getItem('punchExchangeHistory') || '[]');
+  }catch(e){ return []; }
+}
+function saveHistory(entry){
+  const list = loadHistory();
+  list.unshift(entry);
+  localStorage.setItem('punchExchangeHistory', JSON.stringify(list.slice(0,20)));
+  renderHistory();
+}
+function deleteHistory(idx){
+  const list = loadHistory();
+  list.splice(idx,1);
+  localStorage.setItem('punchExchangeHistory', JSON.stringify(list));
+  renderHistory();
+}
+function renderHistory(){
+  const list = loadHistory();
+  const el = document.getElementById('history-list');
+  if(list.length === 0){
+    el.innerHTML = '<div class="empty-hist">還沒有對帳紀錄，算完一筆會自動存在這裡。</div>';
+    return;
+  }
+  el.innerHTML = list.map((item, idx) => {
+    const d = new Date(item.time);
+    const dateStr = d.toLocaleDateString('zh-Hant-TW', {month:'2-digit', day:'2-digit'});
+    const multipleStr = item.multiple !== null ? `${fmt(item.multiple,1)}x 門檻` : '門檻不適用';
+    return `<div class="history-item">
+      <div class="hi-left">${dateStr} · NT$${fmt(item.spend)} · <b>${fmt(item.spendHours,1)}hr</b> · ${multipleStr}</div>
+      <button class="hi-del" onclick="deleteHistory(${idx})">✕</button>
+    </div>`;
+  }).join('');
+}
+
+renderPresets();
+renderHistory();
+</script>
+
+</body>
+</html>
