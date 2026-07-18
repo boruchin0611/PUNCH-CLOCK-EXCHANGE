@@ -350,6 +350,7 @@
       <div class="r-line"><span class="k" id="out-nominal-label">名目時薪</span><span class="v" id="out-nominal">—</span></div>
       <div class="r-line"><span class="k" id="out-compare-label">對照（另一種算法）</span><span class="v" id="out-compare">—</span></div>
       <div class="r-line"><span class="k">真實時薪（含通勤／準備）</span><span class="v" id="out-real">—</span></div>
+      <div class="r-line"><span class="k">真實時薪（月曆天數法＋通勤）</span><span class="v" id="out-real-calendar">—</span></div>
       <div class="r-line"><span class="k">時薪蒸發幅度</span><span class="v" id="out-gap">—</span></div>
 
       <hr class="r-divider">
@@ -493,6 +494,11 @@ function calculate(){
   const calendarNominalWage = salary / (30 * 8);
   const nominalWage = calcMode === 'calendar30' ? calendarNominalWage : scheduleNominalWage;
   const realWage = effectiveSalary / realHours;
+
+  const monthlyExtraHoursActual = realHours - nominalHours; // commute/prep hours implied by schedule
+  const calendarRealHours = (30 * 8) + monthlyExtraHoursActual;
+  const calendarRealWage = effectiveSalary / calendarRealHours;
+
   const gapPct = ((nominalWage - realWage) / nominalWage) * 100;
 
   const spendHours = spend / realWage;
@@ -511,6 +517,7 @@ function calculate(){
   document.getElementById('out-compare').textContent = `NT$ ${fmt(calcMode === 'calendar30' ? scheduleNominalWage : calendarNominalWage)} / 小時`;
 
   document.getElementById('out-real').textContent = `NT$ ${fmt(realWage)} / 小時`;
+  document.getElementById('out-real-calendar').textContent = `NT$ ${fmt(calendarRealWage)} / 小時`;
   document.getElementById('out-gap').textContent = `${gapPct >= 0 ? '－' : '＋'}${fmt(Math.abs(gapPct),1)}%`;
 
   document.getElementById('out-hours').textContent = `${fmt(spendHours,1)} 小時`;
